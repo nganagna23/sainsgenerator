@@ -1,42 +1,1013 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Password Generator V8 Ultimate</title>
-<style>
-body{font-family:Poppins,Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#1e1b4b,#311042);color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
-.card{width:min(520px,92vw);background:rgba(255,255,255,.05);backdrop-filter:blur(16px);padding:24px;border-radius:24px}
-input,button{padding:10px;border-radius:10px;border:none}
-button{width:100%;margin-top:10px;background:#6d28d9;color:#fff}
-.history{margin-top:16px}
-small{color:#cbd5e1}
-</style>
-</head>
-<body>
-<div class="card">
-<h2>Password Generator V8 Ultimate</h2>
-<small>UI placeholder V8 Ultimate (menu fitur lainnya dihapus)</small>
-<input id="uid" placeholder="Input User ID" style="width:100%;margin-top:12px">
-<button onclick="gen()">Generate Data Baru</button>
-<div id="out" style="margin-top:14px"></div>
-<div class="history">
-<h3>History 5 Password Terakhir</h3>
-<ol id="hist"></ol>
+<!DOCTYPE html><html lang="id"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <style>
+        /* Menggunakan font modern dan background gradasi abstrak */
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Dekorasi Bola Animasi di Latar Belakang untuk memperkuat efek Glassmorphism */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+            animation: float 8s ease-in-out infinite alternate;
+        }
+        body::before {
+            width: 300px;
+            height: 300px;
+            background: rgba(99, 102, 241, 0.15);
+            top: 10%;
+            left: 15%;
+        }
+        body::after {
+            width: 250px;
+            height: 250px;
+            background: rgba(219, 39, 119, 0.15);
+            bottom: 10%;
+            right: 15%;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-30px) scale(1.1); }
+        }
+
+        /* Container dengan Efek Glassmorphism Premium */
+        .container {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 460px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(99, 102, 241, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.1);
+        }
+
+        .setting {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            transition: all 0.2s ease;
+            gap: 12px;
+        }
+
+        /* Baris Auto Copy yang didesain khusus bergaya neon glass */
+        .setting.auto-copy-row {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+            margin-top: 20px;
+        }
+
+        label {
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Gaya Input Box Glassmorphism */
+        input[type="text"], input[type="number"] {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #6366f1;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+        }
+        input[type="text"] {
+            width: 55%;
+        }
+        input[type="number"] {
+            width: 65px;
+            text-align: center;
+        }
+        input::placeholder {
+            color: #64748b;
+        }
+
+        /* Alert Helper Text */
+        .helper-text {
+            font-size: 0.8rem;
+            color: #fca5a5;
+            margin-top: 4px;
+            display: none;
+        }
+        .helper-text.show {
+            display: block;
+        }
+
+        .user-id-wrapper {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toggle Switch Style (Geser) */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            box-sizing: border-box;
+        }
+
+        .toggle-switch:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .toggle-switch:focus-visible {
+            outline: 2px solid rgba(99, 102, 241, 0.6);
+            outline-offset: 2px;
+        }
+
+        .toggle-switch.active {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            pointer-events: none; /* Mencegah bug klik miss pada slider bunder */
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 24px;
+            background: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Hidden checkbox untuk toggle */
+        input[type="checkbox"].hidden-checkbox {
+            display: none;
+        }
+
+        /* Tombol Generate dengan Efek Animasi Glow & Pulse */
+        .btn-generate {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 22px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-generate:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5a52e6 0%, #8b4bf0 100%);
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5), 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+        .btn-generate:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .template-section {
+            border-top: 1px dashed rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
+        }
+
+        .template-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Kotak Pesan Hasil yang Transparan Kaca */
+        .message-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px;
+            border-radius: 12px;
+            white-space: pre-line;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100px;
+            transition: all 0.3s ease;
+            word-break: break-word;
+            user-select: all;
+        }
+        .message-box.success {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        .message-box.error {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+            color: #fca5a5;
+        }
+
+        /* Tombol Salin Pesan yang Minimalis & Cantik */
+        .btn-copy {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-copy:hover {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+        .btn-copy:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Animasi Pop-up Halus untuk Notifikasi Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.9);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(-20px) scale(0.9);
+            z-index: 9999;
+            pointer-events: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .toast.error {
+            background: rgba(239, 68, 68, 0.9);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+
+        /* ==================== FITUR MENU & TOOLTIP ==================== */
+        
+        /* Wrapper Menu di Pojok Kiri Atas */
+        .menu-wrapper {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 1000;
+            display: inline-block;
+        }
+
+        /* Tombol Hamburger dengan Efek Kaca */
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* Garis Hamburger */
+        .menu-btn .bar {
+            width: 24px;
+            height: 3px;
+            background-color: #ffffff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Animasi Transisi Menjadi Icon Silang 'X' */
+        .menu-btn.open .bar:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+            background-color: #f43f5e;
+        }
+        .menu-btn.open .bar:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        .menu-btn.open .bar:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+            background-color: #f43f5e;
+        }
+
+        /* Tooltip Premium - Hanya muncul saat Hover */
+        .menu-tooltip {
+            position: absolute;
+            left: 65px;
+            top: 50%;
+            transform: translateY(-50%) translateX(10px);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        /* Anak panah Tooltip */
+        .menu-tooltip::before {
+            content: '';
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent #4f46e5 transparent transparent;
+        }
+
+        /* Murni Berjalan Lewat Efek Hover Mouse (CSS Only) */
+        .menu-wrapper:hover .menu-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* Sembunyikan tooltip total saat menu sedang dalam posisi terbuka (Open) */
+        .menu-wrapper:has(.menu-btn.open) .menu-tooltip {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+
+        /* Sidebar Glassmorphic Navigation */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 280px;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 999;
+            padding: 100px 24px 30px 24px;
+            box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-title {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item a:hover {
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(5px);
+        }
+
+        /* Overlay gelap saat menu terbuka */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .menu-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"></head><body>
+
+
+<div class="toast" id="toastNotif" role="status" aria-live="polite"></div><div class="container">
+    <h2>Password Generator</h2>
+    
+    <div class="setting">
+        <label for="userId">Input User ID</label>
+        <div class="user-id-wrapper">
+            <input 
+                type="text" 
+                id="userId" 
+                placeholder="Contoh: bosku123" 
+                value=""
+                required
+                aria-label="User ID input field"
+                aria-required="true">
+            <div class="helper-text" id="userIdHelper">User ID tidak boleh kosong</div>
+        </div>
+    </div>
+
+    <div class="settings">
+        <div class="setting">
+            <label for="length">Panjang Karakter</label>
+            <input 
+                type="number" 
+                id="length" 
+                min="4" 
+                max="32" 
+                value="8"
+                aria-label="Password length between 4 and 32 characters">
+        </div>
+        <div class="setting">
+            <label for="uppercase">Huruf Besar (A-Z)</label>
+            <input type="checkbox" id="uppercase" class="hidden-checkbox" aria-label="Include uppercase letters A-Z">
+            <button class="toggle-switch" id="uppercaseBtn" data-target="uppercase" role="switch" aria-checked="false" aria-label="Toggle uppercase letters" tabindex="0">
+                <div class="toggle-slider"></div>
+            </button>
+        </div>
+        <div class="setting">
+            <label for="lowercase">Huruf Kecil (a-z)</label>
+            <input type="checkbox" id="lowercase" class="hidden-checkbox" checked aria-label="Include lowercase letters a-z">
+            <button class="toggle-switch active" id="lowercaseBtn" data-target="lowercase" role="switch" aria-checked="true" aria-label="Toggle lowercase letters" tabindex="0">
+                <div class="toggle-slider"></div>
+            </button>
+        </div>
+        <div class="setting">
+            <label for="numbers">Angka (0-9)</label>
+            <input type="checkbox" id="numbers" class="hidden-checkbox" checked aria-label="Include numbers 0-9">
+            <button class="toggle-switch active" id="numbersBtn" data-target="numbers" role="switch" aria-checked="true" aria-label="Toggle numbers" tabindex="0">
+                <div class="toggle-slider"></div>
+            </button>
+        </div>
+        <div class="setting">
+            <label for="symbols">Simbol (!@#$...)</label>
+            <input type="checkbox" id="symbols" class="hidden-checkbox" aria-label="Include special symbols">
+            <button class="toggle-switch" id="symbolsBtn" data-target="symbols" role="switch" aria-checked="false" aria-label="Toggle special symbols" tabindex="0">
+                <div class="toggle-slider"></div>
+            </button>
+        </div>
+        <div class="setting auto-copy-row">
+            <label for="autoCopy" style="color: #60a5fa;">Langsung Copy Setelah Generate</label>
+            <input type="checkbox" id="autoCopy" class="hidden-checkbox" checked aria-label="Automatically copy generated password to clipboard">
+            <button class="toggle-switch active" id="autoCopyBtn" data-target="autoCopy" role="switch" aria-checked="true" aria-label="Toggle auto-copy" tabindex="0">
+                <div class="toggle-slider"></div>
+            </button>
+        </div>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" aria-label="Generate new password data">Generate Data Baru (Enter)</button>
+
+    
+<div id="v8Panel" style="margin-bottom:20px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03)">
+<div style="color:#cbd5e1;margin-bottom:8px">Password Strength</div>
+<div style="height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden">
+<div id="strengthBar" style="height:100%;width:0%"></div>
+</div>
+<div id="entropyText" style="margin-top:8px;color:#94a3b8;font-size:.85rem">Entropy: 0 bits</div>
+<div style="margin-top:10px">
+<button class="btn-copy" id="copyPasswordBtn">Copy Password Only</button>
+</div>
+<div id="historyWrap" style="margin-top:12px;color:#cbd5e1">
+<b>History 5 Password Terakhir</b>
+<div id="historyList" style="margin-top:8px"></div>
 </div>
 </div>
+<div class="template-section">
+        <div class="template-title">
+            <span>Hasil Template Pesan: <small style="font-weight:normal; color:#94a3b8;">(Ctrl+C)</small></span>
+            <button class="btn-copy" id="copyBtn" aria-label="Copy message to clipboard">Salin Pesan</button>
+        </div>
+        <div class="message-box" id="messageBox" role="region" aria-live="polite" aria-label="Generated password message">Silakan isi user id di atas dan klik tombol Generate atau tekan Enter !</div>
+    </div>
+</div><script>
+    // ========== CONSTANTS ==========
+    const MESSAGES = {
+        INITIAL: 'Silakan isi user id di atas dan klik tombol Generate atau tekan Enter !',
+        EMPTY_USERNAME: 'Gagal: User ID tidak boleh kosong!',
+        NO_CHARSET: 'Gagal: Mohon centang minimal 1 opsi karakter password!',
+        COPY_SUCCESS: 'Pesan berhasil disalin',
+        COPY_FAILED: 'Gagal menyalin pesan',
+        MIN_CHARSET: 'Pilih minimal 1 opsi karakter'
+    };
+
+    const CHARSET = {
+        UPPERCASE: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        LOWERCASE: 'abcdefghijklmnopqrstuvwxyz',
+        NUMBERS: '0123456789',
+        SYMBOLS: '!@#$%^&*()_+-=[]{}|;:,.<>?/'
+    };
+
+    const CHARSET_OPTIONS = ['uppercase', 'lowercase', 'numbers', 'symbols'];
+
+    // ========== DOM ELEMENTS ==========
+    const userIdEl = document.getElementById('userId');
+    const lengthEl = document.getElementById('length');
+    const uppercaseEl = document.getElementById('uppercase');
+    const lowercaseEl = document.getElementById('lowercase');
+    const numbersEl = document.getElementById('numbers');
+    const symbolsEl = document.getElementById('symbols');
+    const autoCopyEl = document.getElementById('autoCopy');
+    const generateBtn = document.getElementById('generateBtn');
+    const messageBoxEl = document.getElementById('messageBox');
+    const copyBtn = document.getElementById('copyBtn');
+    const toastNotif = document.getElementById('toastNotif');
+    const userIdHelper = document.getElementById('userIdHelper');
+
+    // Toggle switches
+    const toggleSwitches = document.querySelectorAll('.toggle-switch');
+
+    // DOM Elements Menu Baru
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const menuOverlay = document.getElementById('menuOverlay');
+
+    // ========== UTILITY FUNCTIONS ==========
+    
+    /**
+     * Generate secure random password menggunakan crypto API
+     */
+    function generateSecurePassword(charset, length) {
+        let password = '';
+        const charsetArray = new Uint8Array(length);
+        
+        if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
+            console.warn('Crypto API tidak tersedia, menggunakan Math.random (less secure)');
+            for (let i = 0; i < length; i++) {
+                password += charset[Math.floor(Math.random() * charset.length)];
+            }
+            return password;
+        }
+        
+        crypto.getRandomValues(charsetArray);
+        for (let i = 0; i < length; i++) {
+            password += charset[charsetArray[i] % charset.length];
+        }
+        return password;
+    }
+
+    /**
+     * Tampilkan toast notification
+     */
+    function showToast(message, type = 'success') {
+        toastNotif.textContent = message;
+        toastNotif.classList.remove('success', 'error');
+        toastNotif.classList.add('show', type);
+        
+        // Bersihkan timeout sebelumnya jika ada yang menumpuk
+        if(window.toastTimeout) clearTimeout(window.toastTimeout);
+        window.toastTimeout = setTimeout(() => {
+            toastNotif.classList.remove('show');
+        }, 2500);
+    }
+
+    /**
+     * Validasi input User ID
+     */
+    function validateUsername() {
+        const username = userIdEl.value.trim();
+        const isValid = username.length > 0;
+        
+        userIdHelper.classList.toggle('show', !isValid);
+        userIdEl.setAttribute('aria-invalid', !isValid);
+        
+        return isValid;
+    }
+
+    /**
+     * Validasi minimal 1 charset dipilih
+     */
+    function validateCharset() {
+        return uppercaseEl.checked || lowercaseEl.checked || numbersEl.checked || symbolsEl.checked;
+    }
+
+    /**
+     * Hitung jumlah charset option yang aktif
+     */
+    function getActiveCharsetCount() {
+        let count = 0;
+        CHARSET_OPTIONS.forEach(id => {
+            if (document.getElementById(id).checked) count++;
+        });
+        return count;
+    }
+
+    /**
+     * Set message box styling berdasarkan tipe pesan
+     */
+    function setMessageBoxStyle(type) {
+        messageBoxEl.classList.remove('success', 'error');
+        if (type === 'success') {
+            messageBoxEl.classList.add('success');
+        } else if (type === 'error') {
+            messageBoxEl.classList.add('error');
+        }
+    }
+
+    /**
+     * Update button states berdasarkan kondisi
+     */
+    function updateButtonStates(canCopy) {
+        copyBtn.disabled = !canCopy;
+    }
+
+    /**
+     * Update toggle switch visual dan aria-checked
+     */
+    function updateToggleSwitchVisual(targetId) {
+        const checkbox = document.getElementById(targetId);
+        const switchEl = document.querySelector(`[data-target="${targetId}"]`);
+        
+        if (checkbox.checked) {
+            switchEl.classList.add('active');
+            switchEl.setAttribute('aria-checked', 'true');
+        } else {
+            switchEl.classList.remove('active');
+            switchEl.setAttribute('aria-checked', 'false');
+        }
+    }
+
+    // ========== MAIN FUNCTIONS ==========
+
+    /**
+     * Generate password dan tampilkan hasil
+     */
+    function generateAllData() {
+        try {
+            // Validasi User ID
+            if (!validateUsername()) {
+                messageBoxEl.innerText = MESSAGES.EMPTY_USERNAME;
+                setMessageBoxStyle('error');
+                updateButtonStates(false);
+                showToast(MESSAGES.EMPTY_USERNAME, 'error');
+                return;
+            }
+
+            // Validasi Charset
+            if (!validateCharset()) {
+                messageBoxEl.innerText = MESSAGES.NO_CHARSET;
+                setMessageBoxStyle('error');
+                updateButtonStates(false);
+                showToast(MESSAGES.NO_CHARSET, 'error');
+                return;
+            }
+
+            // Setup data
+            let length = parseInt(lengthEl.value);
+            const username = userIdEl.value.trim();
+
+            // Validasi dan clamp length
+            if (isNaN(length) || length < 4) length = 4;
+            if (length > 32) length = 32;
+            lengthEl.value = length;
+
+            // Build charset
+            let charset = '';
+            if (uppercaseEl.checked) charset += CHARSET.UPPERCASE;
+            if (lowercaseEl.checked) charset += CHARSET.LOWERCASE;
+            if (numbersEl.checked) charset += CHARSET.NUMBERS;
+            if (symbolsEl.checked) charset += CHARSET.SYMBOLS;
+
+            // Generate password
+            const generatedPassword = generateSecurePassword(charset, length);
+
+            // Format pesan
+            const fullMessage = `Silakan dicoba login dengan data baru yang kami berikan ini ya bosku :
+
+User ID : ${username}
+Password : ${generatedPassword}
+
+Setelah anda berhasil melakukan login, silahkan ganti password anda dengan yang baru ya bosku.`;
+
+            messageBoxEl.innerText = fullMessage;
+            setMessageBoxStyle('success');
+            updateButtonStates(true);
+
+            if (!autoCopyEl.checked) {
+                clearUserIdInput();
+            }
+
+            // Auto copy jika diaktifkan
+            if (autoCopyEl.checked) {
+                copyToClipboard(false);
+            }
+        } catch (error) {
+            console.error('Error generating password:', error);
+            messageBoxEl.innerText = 'Gagal: Terjadi kesalahan saat generate password';
+            setMessageBoxStyle('error');
+            updateButtonStates(false);
+            showToast('Terjadi kesalahan', 'error');
+        }
+    }
+
+    /**
+     * Salin teks ke clipboard
+     */
+    function copyToClipboard(checkValidation = true) {
+        const textToCopy = messageBoxEl.innerText;
+
+        if (checkValidation) {
+            if (
+                textToCopy.startsWith('Silakan isi') ||
+                textToCopy.startsWith('Gagal:')
+            ) {
+                return;
+            }
+        }
+
+        if (!navigator.clipboard) {
+            console.warn('Clipboard API tidak tersedia');
+            showToast('Copy tidak didukung di browser ini', 'error');
+            return;
+        }
+
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                showToast(MESSAGES.COPY_SUCCESS, 'success');
+                clearUserIdInput();
+            })
+            .catch((err) => {
+                console.error('Clipboard write failed:', err);
+                showToast(MESSAGES.COPY_FAILED, 'error');
+            });
+    }
+
+    function clearUserIdInput() {
+        userIdEl.value = '';
+        validateUsername();
+        userIdEl.focus();
+    }
+
+
+    // ========== EVENT LISTENERS ==========
+
+    // Fungsi Logika Menu Baru
+    function toggleMenu() {
+        menuBtn.classList.toggle('open');
+        sidebar.classList.toggle('open');
+        menuOverlay.classList.toggle('open');
+    }
+
+    menuBtn.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    // Mencegah input tombol spasi pada User ID
+    userIdEl.addEventListener('keydown', (event) => {
+        if (event.key === ' ') {
+            event.preventDefault();
+        }
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            generateAllData();
+        }
+    });
+
+    // Otomatis menghapus spasi jika user melakukan paste/copypaste teks bermasalah
+    userIdEl.addEventListener('input', () => {
+        userIdEl.value = userIdEl.value.replace(/\s+/g, '');
+        validateUsername();
+    });
+
+    userIdEl.addEventListener('blur', validateUsername);
+
+    lengthEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            generateAllData();
+        }
+    });
+
+    // Toggle switch click handlers
+    toggleSwitches.forEach(switchEl => {
+        switchEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleToggleSwitch(switchEl);
+        });
+
+        // Keyboard support (Space/Enter)
+        switchEl.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                handleToggleSwitch(switchEl);
+            }
+        });
+    });
+
+    /**
+     * Handle toggle switch logic (shared between click & keyboard)
+     */
+    function handleToggleSwitch(switchEl) {
+        const targetId = switchEl.getAttribute('data-target');
+        const checkbox = document.getElementById(targetId);
+        
+        // Jika ini opsi charset (bukan autoCopy)
+        const isCharsetOption = CHARSET_OPTIONS.includes(targetId);
+        
+        if (isCharsetOption && checkbox.checked) {
+            // Cek apakah ini satu-satunya opsi yang aktif
+            const activeCount = getActiveCharsetCount();
+            
+            // Cegah mematikan jika hanya tersisa 1 agar tidak crash/kosong
+            if (activeCount <= 1) {
+                showToast(MESSAGES.MIN_CHARSET, 'error');
+                return;
+            }
+        }
+
+        // Ubah nilai checkbox
+        checkbox.checked = !checkbox.checked;
+        
+        // Perbarui visual
+        updateToggleSwitchVisual(targetId);
+    }
+
+    // Ctrl+C untuk salin
+    window.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c') {
+            const selection = window.getSelection().toString();
+            const isTextInput = document.activeElement === userIdEl;
+            
+            if (!selection && !isTextInput) {
+                event.preventDefault();
+                copyToClipboard(true);
+            }
+        }
+    });
+
+    // Button click handlers
+    generateBtn.addEventListener('click', generateAllData);
+    copyBtn.addEventListener('click', () => copyToClipboard(true));
+
+    // Inisialisasi awal status
+    CHARSET_OPTIONS.concat(['autoCopy']).forEach(id => {
+        updateToggleSwitchVisual(id);
+    });
+    validateUsername();
+    updateButtonStates(false);</script>
 <script>
-const h=[];
-function gen(){
- const chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
- let p='';
- const a=new Uint32Array(8);
- crypto.getRandomValues(a);
- a.forEach(v=>p+=chars[v%chars.length]);
- document.getElementById('out').innerText='Password: '+p;
- h.unshift(p); if(h.length>5) h.pop();
- document.getElementById('hist').innerHTML=h.map(x=>'<li>'+x+'</li>').join('');
+let v8History=[];
+let lastPassword='';
+
+function updateV8(password,length,charsetSize){
+ lastPassword=password;
+ const entropy=(Math.log2(charsetSize||1)*length).toFixed(1);
+ document.getElementById('entropyText').textContent='Entropy: '+entropy+' bits';
+ let score=Math.min(100,Math.round((entropy/80)*100));
+ document.getElementById('strengthBar').style.width=score+'%';
+ document.getElementById('strengthBar').style.background='linear-gradient(90deg,#ef4444,#f59e0b,#10b981)';
+ if(password && !v8History.includes(password)){
+   v8History.unshift(password);
+   v8History=v8History.slice(0,5);
+ }
+ const h=document.getElementById('historyList');
+ h.innerHTML=v8History.map(x=>'<div style="padding:4px 0">'+x+'</div>').join('');
 }
-</script>
-</body>
+
+document.getElementById('copyPasswordBtn')?.addEventListener('click',()=>{
+ if(lastPassword) navigator.clipboard.writeText(lastPassword);
+});
+
+const oldGenerate=generateAllData;
+generateAllData=function(){
+ oldGenerate();
+ const txt=document.getElementById('messageBox').innerText;
+ const m=txt.match(/Password\s*:\s*(.+)/);
+ if(m){
+   const pw=m[1].split('\n')[0].trim();
+   let size=0;
+   if(uppercase.checked) size+=26;
+   if(lowercase.checked) size+=26;
+   if(numbers.checked) size+=10;
+   if(symbols.checked) size+=32;
+   updateV8(pw, parseInt(length.value||8), size);
+ }
+}
+</script></body>
 </html>
