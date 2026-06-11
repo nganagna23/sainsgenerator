@@ -516,7 +516,6 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"></head><body>
 
-
 <div class="toast" id="toastNotif" role="status" aria-live="polite"></div><div class="container">
     <h2>Password Generator</h2>
     
@@ -586,19 +585,15 @@
     <button class="btn-generate" id="generateBtn" aria-label="Generate new password data">Generate Data Baru (Enter)</button>
 
     
-<div id="v8Panel" style="margin-bottom:20px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03)">
-<div style="color:#cbd5e1;margin-bottom:8px">Password Strength</div>
+<div id="v8Panel" style="margin-bottom:15px">
+<div style="color:#cbd5e1;font-size:.9rem">Password Strength</div>
 <div style="height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden">
-<div id="strengthBar" style="height:100%;width:0%"></div>
+<div id="strengthBar" style="height:100%;width:0%;background:#10b981"></div>
 </div>
-<div id="entropyText" style="margin-top:8px;color:#94a3b8;font-size:.85rem">Entropy: 0 bits</div>
-<div style="margin-top:10px">
-<button class="btn-copy" id="copyPasswordBtn">Copy Password Only</button>
-</div>
-<div id="historyWrap" style="margin-top:12px;color:#cbd5e1">
-<b>History 5 Password Terakhir</b>
-<div id="historyList" style="margin-top:8px"></div>
-</div>
+<div id="entropyText" style="margin-top:6px;color:#94a3b8">Entropy: 0 bits</div>
+<button class="btn-copy" id="copyPasswordBtn" type="button" style="margin-top:10px">Copy Password Only</button>
+<div style="margin-top:10px;color:#cbd5e1"><b>History 5 Password Terakhir</b></div>
+<div id="historyList"></div>
 </div>
 <div class="template-section">
         <div class="template-title">
@@ -875,8 +870,8 @@ Setelah anda berhasil melakukan login, silahkan ganti password anda dengan yang 
         menuOverlay.classList.toggle('open');
     }
 
-    menuBtn.addEventListener('click', toggleMenu);
-    menuOverlay.addEventListener('click', toggleMenu);
+    // removed
+    // removed
 
     // Mencegah input tombol spasi pada User ID
     userIdEl.addEventListener('keydown', (event) => {
@@ -972,42 +967,57 @@ Setelah anda berhasil melakukan login, silahkan ganti password anda dengan yang 
     validateUsername();
     updateButtonStates(false);</script>
 <script>
-let v8History=[];
+(function(){
+let historyPw=[];
 let lastPassword='';
 
-function updateV8(password,length,charsetSize){
- lastPassword=password;
- const entropy=(Math.log2(charsetSize||1)*length).toFixed(1);
- document.getElementById('entropyText').textContent='Entropy: '+entropy+' bits';
- let score=Math.min(100,Math.round((entropy/80)*100));
- document.getElementById('strengthBar').style.width=score+'%';
- document.getElementById('strengthBar').style.background='linear-gradient(90deg,#ef4444,#f59e0b,#10b981)';
- if(password && !v8History.includes(password)){
-   v8History.unshift(password);
-   v8History=v8History.slice(0,5);
- }
- const h=document.getElementById('historyList');
- h.innerHTML=v8History.map(x=>'<div style="padding:4px 0">'+x+'</div>').join('');
+function refreshHistory(){
+ const el=document.getElementById('historyList');
+ if(!el) return;
+ el.innerHTML=historyPw.map(p=>'<div style="padding:4px 0">'+p+'</div>').join('');
 }
 
-document.getElementById('copyPasswordBtn')?.addEventListener('click',()=>{
- if(lastPassword) navigator.clipboard.writeText(lastPassword);
+document.addEventListener('click',function(e){
+ if(e.target && e.target.id==='copyPasswordBtn' && lastPassword){
+   navigator.clipboard.writeText(lastPassword);
+ }
 });
 
-const oldGenerate=generateAllData;
-generateAllData=function(){
- oldGenerate();
- const txt=document.getElementById('messageBox').innerText;
+const originalGenerate=window.generateAllData;
+window.generateAllData=function(){
+ originalGenerate();
+
+ const box=document.getElementById('messageBox');
+ const txt=box ? box.innerText : '';
  const m=txt.match(/Password\s*:\s*(.+)/);
- if(m){
-   const pw=m[1].split('\n')[0].trim();
-   let size=0;
-   if(uppercase.checked) size+=26;
-   if(lowercase.checked) size+=26;
-   if(numbers.checked) size+=10;
-   if(symbols.checked) size+=32;
-   updateV8(pw, parseInt(length.value||8), size);
+
+ if(!m) return;
+
+ lastPassword=m[1].split('\n')[0].trim();
+
+ if(lastPassword && !historyPw.includes(lastPassword)){
+   historyPw.unshift(lastPassword);
+   historyPw=historyPw.slice(0,5);
+   refreshHistory();
  }
-}
-</script></body>
-</html>
+
+ const len=parseInt(document.getElementById('length').value||8);
+ let size=0;
+ if(document.getElementById('uppercase').checked) size+=26;
+ if(document.getElementById('lowercase').checked) size+=26;
+ if(document.getElementById('numbers').checked) size+=10;
+ if(document.getElementById('symbols').checked) size+=32;
+
+ const entropy=(Math.log2(Math.max(size,1))*len).toFixed(1);
+
+ const e=document.getElementById('entropyText');
+ if(e) e.textContent='Entropy: '+entropy+' bits';
+
+ const s=document.getElementById('strengthBar');
+ if(s){
+   s.style.width=Math.min(100,(entropy/80)*100)+'%';
+ }
+};
+})();
+</script>
+</body></html>
