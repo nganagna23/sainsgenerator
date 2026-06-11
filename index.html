@@ -2,52 +2,40 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Password Generator V8 Ultimate</title>
 <style>
-body{
-font-family:Arial,sans-serif;
-background:linear-gradient(135deg,#0f172a,#1e1b4b,#311042);
-display:flex;justify-content:center;align-items:center;
-min-height:100vh;margin:0;padding:20px;color:#fff;
-}
-.container{
-width:100%;max-width:500px;
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(12px);
-border-radius:20px;padding:24px;
-}
+body{font-family:Poppins,Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#1e1b4b,#311042);color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
+.card{width:min(520px,92vw);background:rgba(255,255,255,.05);backdrop-filter:blur(16px);padding:24px;border-radius:24px}
 input,button{padding:10px;border-radius:10px;border:none}
-button{cursor:pointer;width:100%;margin-top:12px}
-.history{margin-top:20px}
+button{width:100%;margin-top:10px;background:#6d28d9;color:#fff}
+.history{margin-top:16px}
+small{color:#cbd5e1}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="card">
 <h2>Password Generator V8 Ultimate</h2>
-<p>Versi tanpa menu "Fitur Lainnya".</p>
-<input id="userId" placeholder="User ID" style="width:100%">
-<button onclick="generate()">Generate</button>
-<div id="result" style="margin-top:15px"></div>
+<small>UI placeholder V8 Ultimate (menu fitur lainnya dihapus)</small>
+<input id="uid" placeholder="Input User ID" style="width:100%;margin-top:12px">
+<button onclick="gen()">Generate Data Baru</button>
+<div id="out" style="margin-top:14px"></div>
 <div class="history">
 <h3>History 5 Password Terakhir</h3>
-<ol id="history"></ol>
+<ol id="hist"></ol>
 </div>
 </div>
 <script>
-const historyList=[];
-function rand(len=8){
+const h=[];
+function gen(){
  const chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
- let out='';
- crypto.getRandomValues(new Uint32Array(len)).forEach(v=>out+=chars[v%chars.length]);
- return out;
-}
-function generate(){
- const pw=rand(8);
- document.getElementById('result').innerText='Password: '+pw;
- historyList.unshift(pw);
- if(historyList.length>5) historyList.pop();
- document.getElementById('history').innerHTML=historyList.map(x=>`<li>${x}</li>`).join('');
+ let p='';
+ const a=new Uint32Array(8);
+ crypto.getRandomValues(a);
+ a.forEach(v=>p+=chars[v%chars.length]);
+ document.getElementById('out').innerText='Password: '+p;
+ h.unshift(p); if(h.length>5) h.pop();
+ document.getElementById('hist').innerHTML=h.map(x=>'<li>'+x+'</li>').join('');
 }
 </script>
 </body>
