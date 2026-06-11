@@ -9,15 +9,31 @@ body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#0f
 .sidebar{position:fixed;left:-280px;top:0;width:260px;height:100%;background:#111827;transition:.3s;padding:20px;z-index:10}
 .sidebar.open{left:0}
 .menu-btn{position:fixed;left:15px;top:15px;background:#6366f1;padding:10px 14px;border-radius:10px;cursor:pointer;z-index:11}
-.wrap{max-width:1100px;margin:20px auto;padding:20px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border-radius:20px}
+.wrap{max-width:1100px;margin:70px auto;padding:20px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border-radius:20px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 input,select,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:10px}
 button{background:#6366f1;color:#fff;cursor:pointer}
 .card{background:rgba(255,255,255,.08);padding:12px;border-radius:12px;margin-top:10px}
 .toast{position:fixed;right:20px;bottom:20px;background:#111827;padding:10px 15px;border-radius:10px;display:none}
+
+.menu-wrapper{position:fixed;top:15px;left:15px;z-index:1000}
+.menu-tooltip{font-size:12px;text-align:center;margin-top:6px}
+.menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;visibility:hidden;transition:.3s;z-index:9}
+.menu-overlay.show{opacity:1;visibility:visible}
+.menu-btn{background:rgba(255,255,255,.12)!important;backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:4px}
+.menu-btn .bar{width:22px;height:3px;background:#fff;border-radius:3px;transition:.3s}
+.menu-btn.open .bar:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-btn.open .bar:nth-child(2){opacity:0}
+.menu-btn.open .bar:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 </style>
 </head>
 <body>
+<div class="menu-wrapper"><div class="menu-btn" id="menuBtn" onclick="toggleMenu()"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="menu-tooltip">Cek fitur lainnya</div></div><div class="menu-overlay" id="menuOverlay"></div>
+<div class="sidebar" id="sidebar">
+<h3>Menu</h3>
+<p>💱 Exchange</p><p>⭐ Favorites</p><p>📜 History</p><p>⚙ Settings</p>
+</div>
+
 <div class="wrap">
 <h2>💱 Exchange V11.3 Ultimate Global Edition Full Integration</h2>
 
@@ -58,15 +74,35 @@ button{background:#6366f1;color:#fff;cursor:pointer}
 <div class="toast" id="toast"></div>
 
 <script>
+
 const db=[
-["AFGHANISTAN","AFN"],["ALBANIA","ALL"],["ALGERIA","DZD"],["ARGENTINA","ARS"],
-["AUSTRALIA","AUD"],["BRAZIL","BRL"],["CAMBODIA","KHR"],["CANADA","CAD"],
-["CHINA","CNY"],["EUROPEAN UNION","EUR"],["INDIA","INR"],["INDONESIA","IDR"],
-["JAPAN","JPY"],["MALAYSIA","MYR"],["PHILIPPINES","PHP"],["SINGAPORE","SGD"],
-["SOUTH KOREA","KRW"],["SWITZERLAND","CHF"],["THAILAND","THB"],
+["AFGHANISTAN","AFN"],["ALBANIA","ALL"],["ALGERIA","DZD"],["ANGOLA","AOA"],["ARGENTINA","ARS"],
+["ARMENIA","AMD"],["AUSTRALIA","AUD"],["AZERBAIJAN","AZN"],["BAHAMAS","BSD"],["BAHRAIN","BHD"],
+["BANGLADESH","BDT"],["BARBADOS","BBD"],["BELARUS","BYN"],["BELIZE","BZD"],["BERMUDA","BMD"],
+["BHUTAN","BTN"],["BOLIVIA","BOB"],["BOSNIA AND HERZEGOVINA","BAM"],["BOTSWANA","BWP"],["BRAZIL","BRL"],
+["BRUNEI","BND"],["BULGARIA","BGN"],["BURUNDI","BIF"],["CAMBODIA","KHR"],["CANADA","CAD"],
+["CAPE VERDE","CVE"],["CAYMAN ISLANDS","KYD"],["CHILE","CLP"],["CHINA","CNY"],["COLOMBIA","COP"],
+["COSTA RICA","CRC"],["CROATIA","EUR"],["CUBA","CUP"],["CZECH REPUBLIC","CZK"],["DENMARK","DKK"],
+["DOMINICAN REPUBLIC","DOP"],["EGYPT","EGP"],["ETHIOPIA","ETB"],["EURO","EUR"],["FIJI","FJD"],
+["GEORGIA","GEL"],["GHANA","GHS"],["GUATEMALA","GTQ"],["HONG KONG","HKD"],["HUNGARY","HUF"],
+["ICELAND","ISK"],["INDIA","INR"],["INDONESIA","IDR"],["IRAN","IRR"],["IRAQ","IQD"],
+["ISRAEL","ILS"],["JAMAICA","JMD"],["JAPAN","JPY"],["JORDAN","JOD"],["KAZAKHSTAN","KZT"],
+["KENYA","KES"],["KUWAIT","KWD"],["KYRGYZSTAN","KGS"],["LAOS","LAK"],["LEBANON","LBP"],
+["LIBYA","LYD"],["MACAU","MOP"],["MADAGASCAR","MGA"],["MALAWI","MWK"],["MALAYSIA","MYR"],
+["MALDIVES","MVR"],["MAURITIUS","MUR"],["MEXICO","MXN"],["MOLDOVA","MDL"],["MONGOLIA","MNT"],
+["MOROCCO","MAD"],["MYANMAR","MMK"],["NAMIBIA","NAD"],["NEPAL","NPR"],["NEW ZEALAND","NZD"],
+["NIGERIA","NGN"],["NORWAY","NOK"],["OMAN","OMR"],["PAKISTAN","PKR"],["PANAMA","PAB"],
+["PARAGUAY","PYG"],["PERU","PEN"],["PHILIPPINES","PHP"],["POLAND","PLN"],["QATAR","QAR"],
+["ROMANIA","RON"],["RUSSIA","RUB"],["RWANDA","RWF"],["SAUDI ARABIA","SAR"],["SERBIA","RSD"],
+["SEYCHELLES","SCR"],["SINGAPORE","SGD"],["SOUTH AFRICA","ZAR"],["SOUTH KOREA","KRW"],
+["SRI LANKA","LKR"],["SWEDEN","SEK"],["SWITZERLAND","CHF"],["TAIWAN","TWD"],["TAJIKISTAN","TJS"],
+["TANZANIA","TZS"],["THAILAND","THB"],["TONGA","TOP"],["TRINIDAD AND TOBAGO","TTD"],
+["TUNISIA","TND"],["TURKEY","TRY"],["UGANDA","UGX"],["UKRAINE","UAH"],
 ["UNITED ARAB EMIRATES","AED"],["UNITED KINGDOM","GBP"],["UNITED STATES","USD"],
-["VIETNAM","VND"],["SAUDI ARABIA","SAR"],["MEXICO","MXN"],["PAKISTAN","PKR"]
+["URUGUAY","UYU"],["UZBEKISTAN","UZS"],["VIETNAM","VND"],["YEMEN","YER"],
+["ZAMBIA","ZMW"],["CFA FRANC BEAC","XAF"],["CFA FRANC BCEAO","XOF"],["CFP FRANC","XPF"]
 ];
+
 const from=document.getElementById('from');
 const to=document.getElementById('to');
 db.sort().forEach(c=>{
@@ -75,6 +111,11 @@ to.innerHTML+=`<option value="${c[1]}">${c[0]} (${c[1]})</option>`;
 });
 from.value=localStorage.lastFrom||'USD';
 to.value=localStorage.lastTo||'IDR';
+
+function toggleMenu(){sidebar.classList.toggle('open');document.getElementById('menuBtn').classList.toggle('open');document.getElementById('menuOverlay').classList.toggle('show');}
+document.addEventListener('click',e=>{
+if(!e.target.closest('.sidebar')&&!e.target.closest('.menu-btn')) sidebar.classList.remove('open');
+});
 
 function showToast(t){toast.innerText=t;toast.style.display='block';setTimeout(()=>toast.style.display='none',2000);}
 
@@ -92,7 +133,7 @@ async function convert(force=false){
 localStorage.lastFrom=from.value; localStorage.lastTo=to.value;
 const d=await getRates(from.value,force);
 const dec=+precision.value;
-const amt=+amount.value||1;
+const amt=parseFloat(String(amount.value).replace(/,/g,''))||1;
 const rate=d.rates[to.value];
 const total=amt*rate;
 result.innerHTML=`${amt} ${from.value} = ${total.toLocaleString(undefined,{maximumFractionDigits:dec})} ${to.value}`;
@@ -130,7 +171,7 @@ let q=search.value.toUpperCase();
 });
 
 document.addEventListener('keydown',e=>{if(e.key==='Enter')convert();});
-amount.oninput=()=>convert();
+amount.addEventListener('input',()=>{let cur=amount.value.replace(/,/g,'');if(cur!==''&&!isNaN(cur)){let p=cur.split('.');p[0]=Number(p[0]).toLocaleString('en-US');amount.value=p.join('.');}convert();});
 precision.onchange=()=>convert();
 from.onchange=()=>convert();
 to.onchange=()=>convert();
